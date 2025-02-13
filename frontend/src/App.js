@@ -5,7 +5,7 @@ import "./App.css";
 
 // For production, simply use io().
 // For development, you might need: const socket = io('http://localhost:3001');
-const socket = io("http://localhost:3001");
+const socket = io("http://noah.sooners.us:3003");
 
 function App() {
   const [timers, setTimers] = useState({});
