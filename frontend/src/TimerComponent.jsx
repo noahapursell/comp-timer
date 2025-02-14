@@ -102,7 +102,7 @@ function TimerComponent({ timerId, timerData, socket }) {
   const offset = circumference - progress * circumference;
 
   return (
-    <div className={`timer ${remainingTime <= 240 ? (flashActive ? 'flash' : (hasFlashed ? 'alert' : '')) : ''}`}>
+    <div className={`timer ${remainingTime <= 240  && remainingTime != 0 ? (flashActive ? 'flash' : (hasFlashed ? 'alert' : '')) : ''}`}>
       <div className="timer-header">
         <div className="timer-name">{name}: {task}</div>
         <button className="edit-icon" onClick={() => setShowModal(true)}>✏️</button>
@@ -144,15 +144,6 @@ function TimerComponent({ timerId, timerData, socket }) {
             type="number"
             value={inputMinutes}
             onChange={(e) => setInputMinutes(e.target.value)}
-            className="time-input"
-          />
-        </label>
-        <label>
-          S:
-          <input
-            type="number"
-            value={inputSeconds}
-            onChange={(e) => setInputSeconds(e.target.value)}
             className="time-input"
           />
         </label>
