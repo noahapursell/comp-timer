@@ -2,12 +2,18 @@ import React, { useEffect, useState } from "react";
 import TimerComponent from "./TimerComponent";
 import io from "socket.io-client";
 import "./App.css";
-
+import dotenv from "dotenv";
+dotenv.config();
 // For production, simply use io().
 // For development, you might need: const socket = io('http://localhost:3001');
-const socket = io("http://noah.sooners.us:3003");
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001";
+const PORT = process.env.PORT;
+
+const socket = io(BACKEND_URL);
 
 function App() {
+  console.log("Connecting to backend at:", BACKEND_URL);
+  console.log("PORT:", PORT);
   const [timers, setTimers] = useState({});
   const [darkMode, setDarkMode] = useState(true);
 
