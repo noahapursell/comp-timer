@@ -2,46 +2,69 @@ import React, { useState, useEffect, useRef } from 'react';
 import './TimerComponent.css';
 
 function TimerComponent({ timerId, timerData, socket }) {
-  // Timer properties
+  // Timer properties for display (kept in sync with the backend)
   const [name, setName] = useState(timerData.name);
   const [task, setTask] = useState(timerData.task);
+  const [queue, setQueue] = useState(timerData.queue || "");
   const [inputMinutes, setInputMinutes] = useState(Math.floor(timerData.totalDuration / 60));
   const [inputSeconds, setInputSeconds] = useState(timerData.totalDuration % 60);
   const [totalDuration, setTotalDuration] = useState(timerData.totalDuration);
   const [remainingTime, setRemainingTime] = useState(timerData.remaining);
   const [isRunning, setIsRunning] = useState(timerData.isRunning);
+
+  // Modal open state
   const [showModal, setShowModal] = useState(false);
 
-  // Flashing state for when remaining time falls below 4 minutes (240 seconds)
+  // Flashing state – using a single flashActive flag for toggling
   const [flashActive, setFlashActive] = useState(false);
-  const [hasFlashed, setHasFlashed] = useState(false);
-  const flashStartedRef = useRef(false);
+  // Separate flags to ensure each threshold only triggers once.
+  const [hasFlashedAt5, setHasFlashedAt5] = useState(false);
+  const [hasFlashedAt4, setHasFlashedAt4] = useState(false);
+  const flashStartedAt5Ref = useRef(false);
+  const flashStartedAt4Ref = useRef(false);
 
-  // Update local state when backend state changes.
+  // Update local state from the backend when the modal is closed.
   useEffect(() => {
-    setName(timerData.name);
-    setTask(timerData.task);
+    if (!showModal) {
+      setName(timerData.name);
+      setTask(timerData.task);
+      setQueue(timerData.queue || "");
+    }
     setTotalDuration(timerData.totalDuration);
     setRemainingTime(timerData.remaining);
     setIsRunning(timerData.isRunning);
-  }, [timerData]);
+  }, [timerData, showModal]);
 
-  // Start flashing when remaining time drops below 240 seconds.
+  // Start flashing sequences when thresholds are crossed.
   useEffect(() => {
-    if (remainingTime <= 240 && !hasFlashed && !flashStartedRef.current) {
-      flashStartedRef.current = true;
-      startFlashing(0);
+    if (remainingTime <= 300 && !hasFlashedAt5 && !flashStartedAt5Ref.current) {
+      flashStartedAt5Ref.current = true;
+      startFlashingAt5(0);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (remainingTime <= 240 && !hasFlashedAt4 && !flashStartedAt4Ref.current) {
+      flashStartedAt4Ref.current = true;
+      startFlashingAt4(0);
+    }
   }, [remainingTime]);
 
-  // Recursive flashing function (10 toggles = 5 full flashes).
-  const startFlashing = (count) => {
+  // Recursive flashing function for 5 minutes (10 toggles = 5 full flashes).
+  const startFlashingAt5 = (count) => {
     if (count < 10) {
       setFlashActive(prev => !prev);
-      setTimeout(() => startFlashing(count + 1), 500);
+      setTimeout(() => startFlashingAt5(count + 1), 500);
     } else {
-      setHasFlashed(true);
+      setHasFlashedAt5(true);
+      setFlashActive(false);
+    }
+  };
+
+  // Recursive flashing function for 4 minutes.
+  const startFlashingAt4 = (count) => {
+    if (count < 10) {
+      setFlashActive(prev => !prev);
+      setTimeout(() => startFlashingAt4(count + 1), 500);
+    } else {
+      setHasFlashedAt4(true);
       setFlashActive(false);
     }
   };
@@ -51,6 +74,7 @@ function TimerComponent({ timerId, timerData, socket }) {
     const updatedTimerData = {
       name,
       task,
+      queue,
       totalDuration,
       remaining: remainingTime,
       isRunning,
@@ -68,12 +92,16 @@ function TimerComponent({ timerId, timerData, socket }) {
     setRemainingTime(totalSec);
     setIsRunning(false);
     updateServer({ totalDuration: totalSec, remaining: totalSec, isRunning: false });
-    // Reset flashing if new total time is above 4 minutes.
-    if (totalSec > 240) {
-      setHasFlashed(false);
-      setFlashActive(false);
-      flashStartedRef.current = false;
+    // Reset flashing if new total time is above thresholds.
+    if (totalSec > 300) {
+      setHasFlashedAt5(false);
+      flashStartedAt5Ref.current = false;
     }
+    if (totalSec > 240) {
+      setHasFlashedAt4(false);
+      flashStartedAt4Ref.current = false;
+    }
+    setFlashActive(false);
   };
 
   const handleStart = () => {
@@ -102,9 +130,13 @@ function TimerComponent({ timerId, timerData, socket }) {
   const offset = circumference - progress * circumference;
 
   return (
-    <div className={`timer ${remainingTime <= 240  && remainingTime != 0 ? (flashActive ? 'flash' : (hasFlashed ? 'alert' : '')) : ''}`}>
+    <div className={`timer ${ flashActive ? 'flash' : ((hasFlashedAt5 || hasFlashedAt4) ? 'alert' : '') }`}>
       <div className="timer-header">
-        <div className="timer-name">{name}: {task}</div>
+        <div className="header-left">
+          <div className="timer-name">{name}</div>
+          <div className="task">{task}</div>
+          {queue && <div className="queue">Next: {queue}</div>}
+        </div>
         <button className="edit-icon" onClick={() => setShowModal(true)}>✏️</button>
       </div>
 
@@ -136,8 +168,6 @@ function TimerComponent({ timerId, timerData, socket }) {
       </div>
 
       <div className="timer-controls">
-        <button onClick={handleStart}>Start</button>
-        <button onClick={handlePause}>Pause</button>
         <label>
           M:
           <input
@@ -148,6 +178,8 @@ function TimerComponent({ timerId, timerData, socket }) {
           />
         </label>
         <button onClick={handleSetTimer}>Set</button>
+        <button className="start-button" onClick={handleStart}>Start</button>
+        <button className="pause-button" onClick={handlePause}>Pause</button>
       </div>
 
       {showModal && (
@@ -172,9 +204,18 @@ function TimerComponent({ timerId, timerData, socket }) {
                 className="modal-input"
               />
             </label>
+            <label>
+              Next Task (Queue):
+              <input
+                type="text"
+                value={queue}
+                onChange={(e) => setQueue(e.target.value)}
+                className="modal-input"
+              />
+            </label>
             <button
               onClick={() => {
-                updateServer({ name, task });
+                updateServer({ name, task, queue });
                 setShowModal(false);
               }}
             >

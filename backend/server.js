@@ -16,65 +16,39 @@ const io = socketIo(server, {
   },
 });
 
-// In-memory "ground truth" for timers.
-let timerState = {
-  timer1: {
-    name: "Timer 1",
-    task: "Task A",
+// Efficiently initialize timer state using a loop.
+const timerState = {};
+const timerKeys = [
+  "timer1",
+  "timer2",
+  "timer3",
+  "timer4",
+  "timer5",
+  "timer6",
+  "timer7",
+  "timer8",
+];
+const tasks = [
+  "Task A",
+  "Task B",
+  "Task C",
+  "Task D",
+  "Task E",
+  "Task F",
+  "Task G",
+  "Task H",
+];
+
+timerKeys.forEach((key, index) => {
+  timerState[key] = {
+    name: `Timer ${index + 1}`,
+    task: tasks[index],
+    queue: "", // new field for next task
     totalDuration: 600,
     remaining: 600,
     isRunning: false,
-  },
-  timer2: {
-    name: "Timer 2",
-    task: "Task B",
-    totalDuration: 600,
-    remaining: 600,
-    isRunning: false,
-  },
-  timer3: {
-    name: "Timer 3",
-    task: "Task C",
-    totalDuration: 600,
-    remaining: 600,
-    isRunning: false,
-  },
-  timer4: {
-    name: "Timer 4",
-    task: "Task D",
-    totalDuration: 600,
-    remaining: 600,
-    isRunning: false,
-  },
-  timer5: {
-    name: "Timer 5",
-    task: "Task E",
-    totalDuration: 600,
-    remaining: 600,
-    isRunning: false,
-  },
-  timer6: {
-    name: "Timer 6",
-    task: "Task F",
-    totalDuration: 600,
-    remaining: 600,
-    isRunning: false,
-  },
-  timer7: {
-    name: "Timer 7",
-    task: "Task G",
-    totalDuration: 600,
-    remaining: 600,
-    isRunning: false,
-  },
-  timer8: {
-    name: "Timer 8",
-    task: "Task H",
-    totalDuration: 600,
-    remaining: 600,
-    isRunning: false,
-  },
-};
+  };
+});
 
 // Serve static files from the React build folder.
 app.use(express.static(path.join(__dirname, "build")));
