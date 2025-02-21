@@ -90,7 +90,6 @@ setInterval(() => {
   if (stateChanged) {
     io.emit("stateUpdate", timerState);
   }
-  console.log("Tick");
 }, 1000);
 
 // Fallback: serve index.html for any unknown route.
