@@ -8,7 +8,7 @@ Multi-timer for CCDC.
 
 Make sure the following depencies are installed:
 
-1. **npm** and **node**: [installatio](https://nodejs.org/en/download/)
+1. **npm** and **node**: [installation](https://nodejs.org/en/download/)
 
 ### Downloading Project
 
@@ -18,7 +18,7 @@ Make sure the following depencies are installed:
 
 To configue the project, you must create two `.env` files. One should be placed in `./frontend/.env` and the other in `./backend/.env`. Look at `./frontend/.env.example` and `./backend/.env.example` for an example configuration.
 
-## Running Project
+## Running the Project
 
 The project consists of two parts. A frontend and a backend. Each one is started separatly.
 
