@@ -1,0 +1,21 @@
+services:
+    frontend:
+      build: 
+        context: ./frontend
+        args:
+          - REACT_APP_BACKEND_URL=http://ccdc-timer-backend.noahjedi.com/
+      ports:
+        - "8000:80"
+      environment:
+        - PORT=777
+
+      depends_on:
+        - backend
+
+    backend:
+      build: ./backend
+      ports:
+        - "8001:777"
+      environment:
+        - PORT=777
+     

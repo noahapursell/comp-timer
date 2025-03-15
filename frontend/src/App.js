@@ -4,9 +4,11 @@ import io from "socket.io-client";
 import "./App.css";
 // For production, simply use io().
 // For development, you might need: const socket = io('http://localhost:3001');
-const BACKEND_URL =
-  process.env.REACT_APP_BACKEND_URL || "http://localhost:3001";
 
+var BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+if (window.location.protocol === "https:" && BACKEND_URL.startsWith("http://")) {
+  BACKEND_URL = BACKEND_URL.replace("http://", "https://");
+}
 const socket = io(BACKEND_URL);
 
 function App() {

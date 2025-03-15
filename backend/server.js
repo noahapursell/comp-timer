@@ -3,16 +3,20 @@ const http = require("http");
 const socketIo = require("socket.io");
 const path = require("path");
 const dotenv = require("dotenv");
+const cors = require("cors");
 dotenv.config();
 
 const app = express();
+app.use(cors());
 const server = http.createServer(app);
 
 // Enable CORS for Socket.io so that clients on different ports can connect.
 const io = socketIo(server, {
   cors: {
-    origin: "*",
+    origin: ["http://localhost:8000", "http://noahjedi.com", "http://ccdc-timer.noahjedi.com", "https://ccdc-timer.noahjedi.com"],
     methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+    credentials: true,
   },
 });
 
@@ -94,7 +98,7 @@ setInterval(() => {
 
 // Fallback: serve index.html for any unknown route.
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "build", "index.html"));
+  res.json("Hello World!");
 });
 
 const PORT = process.env.PORT || 3003;
