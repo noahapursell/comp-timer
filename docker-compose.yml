@@ -8,6 +8,7 @@ services:
         - "8000:80"
       environment:
         - PORT=777
+      restart: always
 
       depends_on:
         - backend
@@ -18,4 +19,5 @@ services:
         - "8001:777"
       environment:
         - PORT=777
+      restart: always
      
