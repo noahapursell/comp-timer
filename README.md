@@ -6,7 +6,7 @@ Multi-timer for CCDC.
 
 ### Dependencies
 
-Make sure the following depencies are installed:
+Make sure the following dependencies are installed:
 
 1. **npm** and **node**: [installation](https://nodejs.org/en/download/)
 
