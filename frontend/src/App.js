@@ -5,11 +5,11 @@ import "./App.css";
 // For production, simply use io().
 // For development, you might need: const socket = io('http://localhost:3001');
 
-var BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-if (window.location.protocol === "https:" && BACKEND_URL.startsWith("http://")) {
+let BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "";
+if (BACKEND_URL && window.location.protocol === "https:" && BACKEND_URL.startsWith("http://")) {
   BACKEND_URL = BACKEND_URL.replace("http://", "https://");
 }
-const socket = io(BACKEND_URL);
+const socket = BACKEND_URL ? io(BACKEND_URL) : io();
 
 function App() {
   console.log("Connecting to backend at:", BACKEND_URL);
